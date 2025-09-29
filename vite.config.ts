@@ -32,6 +32,15 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    host: '0.0.0.0',
+    port: parseInt(process.env.PORT || '5000', 10),
+    strictPort: true,
+    hmr: {
+      port: parseInt(process.env.PORT || '5000', 10),
+      clientPort: parseInt(process.env.PORT || '5000', 10),
+      host: 'localhost',
+      protocol: 'ws',
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],
