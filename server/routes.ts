@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { TwilioService } from "./twilioService";
-import { phoneVerificationSchema, otpVerificationSchema } from "@shared/schema";
+import { signupSchema } from "@shared/schema";
 import { z } from "zod";
 
 const twilioService = new TwilioService();
@@ -32,10 +32,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Phone verification for registration
-  app.post('/api/auth/verify-phone', async (req, res) => {
+  // Direct signup without OTP
+  app.post('/api/auth/signup', async (req, res) => {
     try {
-      const { phone, nid } = phoneVerificationSchema.parse(req.body);
+      const { phone, nid, firstName, lastName } = signupSchema.parse(req.body);
       
       // Check if phone already exists
       const existingUser = await storage.getUserByPhone(phone);
@@ -43,51 +43,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Phone number already registered" });
       }
 
-      // Send OTP via Twilio
-      const verification = await twilioService.sendOTP(phone);
-      
-      res.json({ 
-        message: "OTP sent successfully",
-        verificationSid: verification.sid 
-      });
-    } catch (error) {
-      console.error("Phone verification error:", error);
-      res.status(500).json({ message: "Failed to send OTP" });
-    }
-  });
-
-  // OTP verification and user creation
-  app.post('/api/auth/verify-otp', async (req, res) => {
-    try {
-      const { phone, otp } = otpVerificationSchema.parse(req.body);
-      
-      // Verify OTP with Twilio
-      const verificationCheck = await twilioService.verifyOTP(phone, otp);
-      
-      if (verificationCheck.status !== 'approved') {
-        return res.status(400).json({ message: "Invalid OTP" });
-      }
-
-      // Create user if verification successful
+      // Create user directly without OTP verification
       const userData = {
         phone,
+        nid,
+        firstName,
+        lastName,
         isVerified: true,
         twilioIdentity: `user_${Date.now()}`,
       };
 
       const user = await storage.upsertUser(userData);
       
-      // Generate Twilio access token
+      // Generate Twilio access token for voice calls
       const accessToken = twilioService.generateAccessToken(user.twilioIdentity!);
       
       res.json({ 
-        message: "Phone verified successfully",
+        message: "Account created successfully",
         user,
         twilioToken: accessToken
       });
     } catch (error) {
-      console.error("OTP verification error:", error);
-      res.status(500).json({ message: "Failed to verify OTP" });
+      console.error("Signup error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create account" });
     }
   });
 
