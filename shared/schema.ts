@@ -35,7 +35,7 @@ export const users = pgTable("users", {
   nid: varchar("nid"),
   balance: decimal("balance", { precision: 10, scale: 2 }).default("0.00"),
   twilioIdentity: varchar("twilio_identity"),
-  isVerified: boolean("is_verified").default(false),
+  isVerified: boolean("is_verified").default(true),
   language: varchar("language").default("en"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -126,13 +126,9 @@ export type Transaction = typeof transactions.$inferSelect;
 export type InsertCallRate = z.infer<typeof insertCallRateSchema>;
 export type CallRate = typeof callRates.$inferSelect;
 
-// Phone verification schema
-export const phoneVerificationSchema = z.object({
+export const signupSchema = z.object({
   phone: z.string().regex(/^\+880[1-9]\d{8,9}$/, "Invalid Bangladesh phone number"),
   nid: z.string().min(10).max(17),
-});
-
-export const otpVerificationSchema = z.object({
-  phone: z.string(),
-  otp: z.string().length(6),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
 });
