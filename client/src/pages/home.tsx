@@ -2,16 +2,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, LanguageContext, useLanguageProvider } from "@/hooks/useLanguage";
 import { useTheme, ThemeContext, useThemeProvider } from "@/hooks/useTheme";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { LoginScreen } from "@/components/LoginScreen";
 import { MainApp } from "@/components/MainApp";
 import { useToast } from "@/hooks/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
 
 function HomeContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const typedUser = user as any;
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Initialize WebSocket connection for real-time notifications
   useWebSocket({
@@ -40,20 +36,8 @@ function HomeContent() {
     );
   }
 
-  // If user is authenticated but hasn't registered phone/NID, show signup form
-  if (isAuthenticated && !typedUser?.phone) {
-    return (
-      <LoginScreen
-        onSignupComplete={() => {
-          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-          window.location.reload();
-        }}
-      />
-    );
-  }
-
-  // If user is authenticated and has registered, show main app
-  if (isAuthenticated && typedUser?.phone) {
+  // If user is authenticated, show main app
+  if (isAuthenticated) {
     return <MainApp />;
   }
 

@@ -24,7 +24,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
+      
+      // Auto-create user if doesn't exist
+      if (!user) {
+        const userData = {
+          id: userId,
+          email: req.user.claims.email,
+          firstName: req.user.claims.given_name,
+          lastName: req.user.claims.family_name,
+          profileImageUrl: req.user.claims.picture,
+          isVerified: true,
+          twilioIdentity: `user_${Date.now()}`,
+        };
+        user = await storage.upsertUser(userData);
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -33,22 +48,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Direct signup without OTP
-  app.post('/api/auth/signup', async (req, res) => {
+  app.post('/api/auth/signup', isAuthenticated, async (req: any, res) => {
     try {
       const { phone, nid, firstName, lastName } = signupSchema.parse(req.body);
       
-      // Check if phone already exists
+      // Get authenticated user ID from Replit Auth
+      const userId = req.user.claims.sub;
+      const email = req.user.claims.email;
+      
+      // Check if phone already exists for a different user
       const existingUser = await storage.getUserByPhone(phone);
-      if (existingUser) {
+      if (existingUser && existingUser.id !== userId) {
         return res.status(400).json({ message: "Phone number already registered" });
       }
 
-      // Create user directly without OTP verification
+      // Create/update user with Replit Auth ID
       const userData = {
+        id: userId,
+        email: email,
         phone,
         nid,
-        firstName,
-        lastName,
+        firstName: firstName || req.user.claims.given_name,
+        lastName: lastName || req.user.claims.family_name,
         isVerified: true,
         twilioIdentity: `user_${Date.now()}`,
       };
