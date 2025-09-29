@@ -42,7 +42,7 @@ export function LoginScreen({ onOTPSent }: LoginScreenProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!phone.match(/^\+880[1-9]\d{8}$/)) {
+    if (!phone.match(/^\+880[1-9]\d{8,9}$/)) {
       toast({
         title: t("Invalid phone number"),
         description: t("Please enter a valid Bangladesh phone number"),

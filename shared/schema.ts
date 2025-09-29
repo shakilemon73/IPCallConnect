@@ -128,7 +128,7 @@ export type CallRate = typeof callRates.$inferSelect;
 
 // Phone verification schema
 export const phoneVerificationSchema = z.object({
-  phone: z.string().regex(/^\+880[1-9]\d{8}$/, "Invalid Bangladesh phone number"),
+  phone: z.string().regex(/^\+880[1-9]\d{8,9}$/, "Invalid Bangladesh phone number"),
   nid: z.string().min(10).max(17),
 });
 

@@ -14,6 +14,7 @@ const apiKey: string = process.env.TWILIO_API_KEY;
 const apiSecret: string = process.env.TWILIO_API_SECRET;
 const appSid = process.env.TWILIO_APP_SID;
 const verifySid = process.env.TWILIO_VERIFY_SID;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 const client = twilio(accountSid, authToken);
 const { AccessToken } = twilio.jwt;
@@ -84,11 +85,15 @@ export class TwilioService {
   // Initiate outbound call to PSTN
   async initiateCall(fromIdentity: string, toNumber: string): Promise<string> {
     try {
+      if (!twilioPhoneNumber) {
+        throw new Error('TWILIO_PHONE_NUMBER is not configured');
+      }
+      
       const call = await client.calls.create({
         to: toNumber,
-        from: '+1234567890', // Your Twilio phone number
-        twiml: `<Response><Dial callerId="+1234567890">${toNumber}</Dial></Response>`,
-        statusCallback: `${process.env.BASE_URL || 'https://your-domain.com'}/api/webhooks/twilio/call-status`,
+        from: twilioPhoneNumber,
+        twiml: `<Response><Dial callerId="${twilioPhoneNumber}">${toNumber}</Dial></Response>`,
+        statusCallback: `${process.env.BASE_URL}/api/webhooks/twilio/call-status`,
         statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
         statusCallbackMethod: 'POST',
       });
