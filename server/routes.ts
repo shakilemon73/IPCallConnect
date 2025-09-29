@@ -218,9 +218,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         callSid,
         estimatedCost 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Call initiation error:", error);
-      res.status(500).json({ message: "Failed to initiate call" });
+      
+      // Handle Twilio authentication errors specifically
+      if (error.status === 401 || error.code === 20003) {
+        return res.status(503).json({ 
+          message: "PSTN calling is not available. Twilio credentials need to be configured properly.",
+          error: "twilio_auth_failed"
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to initiate call",
+        error: error.message || "Unknown error"
+      });
     }
   });
 
