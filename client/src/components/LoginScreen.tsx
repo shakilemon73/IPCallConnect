@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/useLanguage";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -9,31 +9,35 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Phone } from "lucide-react";
 
 interface LoginScreenProps {
-  onOTPSent: (phone: string) => void;
+  onSignupComplete?: () => void;
 }
 
-export function LoginScreen({ onOTPSent }: LoginScreenProps) {
+export function LoginScreen({ onSignupComplete }: LoginScreenProps) {
   const [phone, setPhone] = useState("");
   const [nid, setNid] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const { language, setLanguage, t } = useLanguage();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const verifyPhoneMutation = useMutation({
-    mutationFn: async (data: { phone: string; nid: string }) => {
-      const response = await apiRequest("POST", "/api/auth/verify-phone", data);
+  const signupMutation = useMutation({
+    mutationFn: async (data: { phone: string; nid: string; firstName?: string; lastName?: string }) => {
+      const response = await apiRequest("POST", "/api/auth/signup", data);
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: t("OTP Sent"),
-        description: t("Please check your phone for the verification code"),
+        title: t("Account Created"),
+        description: t("Welcome to VoiceLink!"),
       });
-      onOTPSent(phone);
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      onSignupComplete?.();
     },
     onError: (error: any) => {
       toast({
         title: t("Error"),
-        description: error.message || t("Failed to send OTP"),
+        description: error.message || t("Failed to create account"),
         variant: "destructive",
       });
     },
@@ -60,7 +64,7 @@ export function LoginScreen({ onOTPSent }: LoginScreenProps) {
       return;
     }
 
-    verifyPhoneMutation.mutate({ phone, nid });
+    signupMutation.mutate({ phone, nid, firstName, lastName });
   };
 
   return (
@@ -140,16 +144,44 @@ export function LoginScreen({ onOTPSent }: LoginScreenProps) {
               />
             </div>
 
+            <div>
+              <Label htmlFor="firstName" className="block text-sm font-medium mb-2">
+                {t("First Name")} ({t("Optional")})
+              </Label>
+              <Input
+                id="firstName"
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                data-testid="input-firstname"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="lastName" className="block text-sm font-medium mb-2">
+                {t("Last Name")} ({t("Optional")})
+              </Label>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                data-testid="input-lastname"
+              />
+            </div>
+
             <Button
               type="submit"
               className="w-full"
-              disabled={verifyPhoneMutation.isPending}
-              data-testid="button-send-otp"
+              disabled={signupMutation.isPending}
+              data-testid="button-signup"
             >
-              {verifyPhoneMutation.isPending && (
+              {signupMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              {t("Send OTP")}
+              {t("Create Account")}
             </Button>
 
             <div className="text-center">
