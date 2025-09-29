@@ -1,0 +1,24 @@
+Develop a comprehensive Android mobile app for an IP-based calling system, similar to Bangladeshi VoIP services like Alap (BTCL), Amber IT, and Brilliant Connect. The app should enable free app-to-app voice and video calls (IP-to-IP), low-cost outbound calls to PSTN/mobile numbers, user registration with NID verification for compliance with BTRC regulations in Bangladesh, in-app recharge via integrated payment gateways like bKash, and features like IVR menus, call history, group chats, and low-data modes for efficient bandwidth usage.
+
+### Key Functional Requirements:
+- User Onboarding: Secure registration/login with email/phone/NID (National ID) verification to meet KYC standards. Include OTP for phone verification and optional social logins (Google/Facebook).
+- Calling Features:
+  - Free IP-to-IP calls between app users (voice and video), with end-to-end encryption (SRTP for media, TLS for signaling).
+  - Outbound calls to Bangladesh PSTN/mobile numbers (e.g., +880 prefixes) at low rates (simulate 30-40 paisa/min, with every-second billing).
+  - Inbound call handling from Twilio numbers, with push notifications for incoming calls.
+  - Support for group calls/conferencing (up to 5-10 users) and screen sharing.
+- UI/UX: Modern Material Design interface with tabs for Contacts, Call History, Dialer, and Wallet. Include dark mode, multilingual support (Bengali/English), and accessibility features.
+- Wallet and Billing: In-app balance management with recharge options via bKash, Nagad, or credit cards. Display call rates, usage history, and no-expiry balance. Integrate promo codes for bonuses (e.g., 20% cashback).
+- Advanced Features: IVR for extensions (e.g., gather digits for routing), call recording (with user consent), stickers/emojis in chat, and low-data mode (optimize codecs like Opus for 6x data savings).
+- Compliance and Security: Adhere to BTRC IPTSP guidelines (e.g., no unsolicited calls, traffic routing via approved gateways). Use HTTPS, data encryption, and GDPR-like privacy policies.
+
+### Technical Stack and Integration:
+- Backend: Use Twilio Programmable Voice SDK for Android to handle SIP registration, calls, and TwiML for logic. Create a SIP Domain (e.g., yourapp.sip.us1.twilio.com) for user endpoints. Integrate Twilio REST APIs for call initiation, monitoring, and billing.
+- Frontend: Kotlin/Java with Android Jetpack (ViewModel, LiveData, Navigation). Use WebRTC for peer-to-peer media in app-to-app calls.
+- Networking: Retrofit/OkHttp for API calls; Firebase for push notifications (FCM) and real-time database for user presence/status.
+- Payments: Integrate bKash SDK or API for seamless recharges.
+- Database: Room for local storage (call logs, contacts); Firebase Firestore for cloud sync.
+- Testing and Deployment: Support Android 8.0+; use JUnit/Espresso for testing. Deploy to Google Play Store with beta testing for Bangladesh users.
+- Scalability: Handle dynamic IP registration for mobile users; optimize for low-latency in Bangladesh (use Twilio's global edges).
+
+Provide the full source code structure, including key classes (e.g., CallManager for Twilio integration, RechargeActivity), build.gradle dependencies (e.g., implementation 'com.twilio:voice-android:6.x.x'), and step-by-step setup guide for Twilio credentials. Ensure the app is open-source friendly and includes error handling for network issues.
