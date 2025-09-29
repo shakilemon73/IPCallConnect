@@ -28,7 +28,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         if (wsRef.current && user) {
           wsRef.current.send(JSON.stringify({
             type: 'authenticate',
-            userId: user.id
+            userId: (user as any).id
           }));
         }
         options.onOpen?.();

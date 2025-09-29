@@ -14,6 +14,7 @@ function HomeContent() {
   const [authStep, setAuthStep] = useState<AuthStep>("login");
   const [phoneNumber, setPhoneNumber] = useState("");
   const { user, isAuthenticated, isLoading } = useAuth();
+  const typedUser = user as any;
   const { toast } = useToast();
 
   // Initialize WebSocket connection for real-time notifications
@@ -44,12 +45,12 @@ function HomeContent() {
   }
 
   // If user is authenticated and has completed phone verification, show main app
-  if (isAuthenticated && user?.isVerified) {
+  if (isAuthenticated && typedUser?.isVerified) {
     return <MainApp />;
   }
 
   // If user is authenticated but hasn't verified phone, show verification flow
-  if (isAuthenticated && !user?.isVerified) {
+  if (isAuthenticated && !typedUser?.isVerified) {
     if (authStep === "login") {
       return (
         <LoginScreen

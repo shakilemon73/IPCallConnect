@@ -22,7 +22,7 @@ export function HistoryTab({ onCall }: HistoryTabProps) {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  const filteredHistory = callHistory.filter((call: CallHistory) => {
+  const filteredHistory = (callHistory as CallHistory[]).filter((call: CallHistory) => {
     if (filter === "all") return true;
     return call.callType === filter;
   });
@@ -81,6 +81,11 @@ export function HistoryTab({ onCall }: HistoryTabProps) {
     } else {
       return format(date, "MMM d, yyyy");
     }
+  };
+
+  const formatDateSafe = (dateString: Date | string | null) => {
+    if (!dateString) return "Unknown";
+    return formatDate(dateString as string);
   };
 
   return (
@@ -167,17 +172,17 @@ export function HistoryTab({ onCall }: HistoryTabProps) {
                     <span className="text-xs">{getCallTypeLabel(call)}</span>
                   </div>
                   <p className="text-xs text-muted-foreground" data-testid={`call-date-${call.id}`}>
-                    {formatDate(call.createdAt)}
+                    {formatDateSafe(call.createdAt)}
                   </p>
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-4">
-                  {call.duration > 0 && (
+                  {(call.duration ?? 0) > 0 && (
                     <span className="text-muted-foreground">
                       <Clock className="inline w-3 h-3 mr-1" />
                       <span data-testid={`call-duration-${call.id}`}>
-                        {formatDuration(call.duration)}
+                        {formatDuration(call.duration ?? 0)}
                       </span>
                     </span>
                   )}

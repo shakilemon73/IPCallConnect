@@ -36,8 +36,8 @@ export function DialerTab({ onCall }: DialerTabProps) {
   });
 
   useEffect(() => {
-    if (rateData) {
-      setEstimatedCost(rateData.rate);
+    if (rateData && (rateData as any).rate) {
+      setEstimatedCost((rateData as any).rate);
     }
   }, [rateData]);
 
@@ -61,7 +61,7 @@ export function DialerTab({ onCall }: DialerTabProps) {
       <div className="bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20 rounded-lg p-3 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium">{rateData?.description || t("Bangladesh Mobile")}</p>
+            <p className="text-sm font-medium">{(rateData as any)?.description || t("Bangladesh Mobile")}</p>
             <p className="text-xs text-muted-foreground">{t("Per minute rate")}</p>
           </div>
           <div className="text-right">

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, Plus, Minus, CreditCard, Smartphone, Clock, Loader2 } from "lucide-react";
+import { Wallet, Plus, Minus, CreditCard, Smartphone, Clock, Loader2, Phone } from "lucide-react";
 import { format } from "date-fns";
 import type { Transaction } from "@shared/schema";
 
@@ -88,7 +88,7 @@ export function WalletTab() {
     return <Phone className="w-4 h-4 text-destructive" />;
   };
 
-  const lastRecharge = transactions.find((t: Transaction) => t.type === "recharge");
+  const lastRecharge = (transactions as Transaction[]).find((t: Transaction) => t.type === "recharge");
 
   return (
     <div className="p-4">
@@ -108,7 +108,7 @@ export function WalletTab() {
         <div className="flex items-center justify-between text-sm">
           <span>{t("Last recharge:")}</span>
           <span data-testid="text-last-recharge">
-            {lastRecharge ? formatDate(lastRecharge.createdAt) : "Never"}
+            {lastRecharge && lastRecharge.createdAt ? formatDate(lastRecharge.createdAt as unknown as string) : "Never"}
           </span>
         </div>
       </div>
@@ -273,7 +273,7 @@ export function WalletTab() {
           </div>
         ) : (
           <div className="space-y-2">
-            {transactions.slice(0, 10).map((transaction: Transaction) => (
+            {(transactions as Transaction[]).slice(0, 10).map((transaction: Transaction) => (
               <div key={transaction.id} className="bg-card border border-border rounded-lg p-3 flex items-center justify-between" data-testid={`transaction-${transaction.id}`}>
                 <div className="flex items-center space-x-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -287,7 +287,7 @@ export function WalletTab() {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       <Clock className="inline w-3 h-3 mr-1" />
-                      {formatDate(transaction.createdAt)}
+                      {transaction.createdAt ? formatDate(transaction.createdAt as unknown as string) : "N/A"}
                     </p>
                   </div>
                 </div>

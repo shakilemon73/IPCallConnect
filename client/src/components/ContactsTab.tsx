@@ -98,7 +98,7 @@ export function ContactsTab({ onCall }: ContactsTabProps) {
       .slice(0, 2);
   };
 
-  const displayedContacts = searchQuery.trim() ? searchResults : contacts;
+  const displayedContacts = (searchQuery.trim() ? searchResults : contacts) as Contact[];
 
   return (
     <div className="p-4">
@@ -187,13 +187,13 @@ export function ContactsTab({ onCall }: ContactsTabProps) {
             </div>
           ))}
         </div>
-      ) : displayedContacts.length === 0 ? (
+      ) : (displayedContacts as Contact[]).length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           {searchQuery ? t("No contacts found") : t("No contacts yet")}
         </div>
       ) : (
         <div className="space-y-2">
-          {displayedContacts.map((contact: Contact) => (
+          {(displayedContacts as Contact[]).map((contact: Contact) => (
             <div key={contact.id} className="bg-card border border-border rounded-lg p-4 flex items-center space-x-3" data-testid={`contact-item-${contact.id}`}>
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white font-semibold">
                 {getContactInitials(contact.name)}

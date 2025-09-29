@@ -18,6 +18,7 @@ export function MainApp() {
   const [isInCall, setIsInCall] = useState(false);
   const [callData, setCallData] = useState<any>(null);
   const { user } = useAuth();
+  const typedUser = user as any;
   const { t } = useLanguage();
 
   const startCall = (phoneNumber: string, contactName?: string, callType: 'voice' | 'video' | 'pstn' = 'pstn') => {
@@ -72,7 +73,7 @@ export function MainApp() {
           {/* Balance Display */}
           <div className="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium">
             <Wallet className="w-4 h-4 inline mr-1" />
-            <span data-testid="text-balance">৳ {user?.balance || "0.00"}</span>
+            <span data-testid="text-balance">৳ {typedUser?.balance || "0.00"}</span>
           </div>
           
           {/* Settings Button */}

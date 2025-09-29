@@ -24,10 +24,11 @@ interface SettingsModalProps {
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
   const { user } = useAuth();
+  const typedUser = user as any;
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
 
-  const getInitials = (firstName?: string, lastName?: string) => {
+  const getInitials = (firstName?: string | null, lastName?: string | null) => {
     if (!firstName && !lastName) return "?";
     return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
   };
@@ -63,18 +64,18 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
             <div className="bg-card border border-border rounded-lg p-4 flex items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-white text-xl font-bold">
                 <span data-testid="text-user-initials">
-                  {getInitials(user?.firstName, user?.lastName)}
+                  {getInitials(typedUser?.firstName, typedUser?.lastName)}
                 </span>
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold" data-testid="text-user-name">
-                  {user?.firstName && user?.lastName 
-                    ? `${user.firstName} ${user.lastName}`
-                    : user?.email || "User"
+                  {typedUser?.firstName && typedUser?.lastName 
+                    ? `${typedUser.firstName} ${typedUser.lastName}`
+                    : typedUser?.email || "User"
                   }
                 </h3>
                 <p className="text-sm text-muted-foreground" data-testid="text-user-phone">
-                  {user?.phone || user?.email || "Not provided"}
+                  {typedUser?.phone || typedUser?.email || "Not provided"}
                 </p>
                 <p className="text-xs text-secondary">{t("Verified Account")}</p>
               </div>

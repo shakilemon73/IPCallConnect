@@ -191,8 +191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Check balance for PSTN calls
         const rate = await storage.getCallRateByPrefix(to);
         if (rate) {
-          estimatedCost = rate.ratePerMinute;
-          if (parseFloat(user.balance) < parseFloat(estimatedCost)) {
+          estimatedCost = rate.ratePerMinute ?? "0.00";
+          if (parseFloat(user.balance ?? "0") < parseFloat(estimatedCost)) {
             return res.status(400).json({ message: "Insufficient balance" });
           }
         }
