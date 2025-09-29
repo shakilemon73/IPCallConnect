@@ -1,11 +1,19 @@
 import twilio from 'twilio';
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID || 'AC5db3589c60fdf72b2ec5b3db440e1680';
-const authToken = process.env.TWILIO_AUTH_TOKEN || '39d19f8cf0a24f6334d539130de7d07e';
-const apiKey = process.env.TWILIO_API_KEY || 'SK3883f257ea1b07e763b927bf6eab255f';
-const apiSecret = process.env.TWILIO_API_SECRET || 'qv3vnzCNAFqZZyoqPqGNh8qEoo32FSmj';
-const appSid = process.env.TWILIO_APP_SID || 'APb03a8d98f217b599f3fc73e07c3e4db6';
-const verifySid = process.env.TWILIO_VERIFY_SID || 'VA123456789'; // You'll need to create this
+if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+  throw new Error('TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN must be set in environment variables');
+}
+
+if (!process.env.TWILIO_API_KEY || !process.env.TWILIO_API_SECRET) {
+  throw new Error('TWILIO_API_KEY and TWILIO_API_SECRET must be set in environment variables');
+}
+
+const accountSid: string = process.env.TWILIO_ACCOUNT_SID;
+const authToken: string = process.env.TWILIO_AUTH_TOKEN;
+const apiKey: string = process.env.TWILIO_API_KEY;
+const apiSecret: string = process.env.TWILIO_API_SECRET;
+const appSid = process.env.TWILIO_APP_SID;
+const verifySid = process.env.TWILIO_VERIFY_SID;
 
 const client = twilio(accountSid, authToken);
 const { AccessToken } = twilio.jwt;
@@ -34,6 +42,9 @@ export class TwilioService {
   // Send OTP for phone verification
   async sendOTP(phoneNumber: string) {
     try {
+      if (!verifySid) {
+        throw new Error('TWILIO_VERIFY_SID is not configured');
+      }
       const verification = await client.verify.v2
         .services(verifySid)
         .verifications
@@ -52,6 +63,9 @@ export class TwilioService {
   // Verify OTP
   async verifyOTP(phoneNumber: string, code: string) {
     try {
+      if (!verifySid) {
+        throw new Error('TWILIO_VERIFY_SID is not configured');
+      }
       const verificationCheck = await client.verify.v2
         .services(verifySid)
         .verificationChecks
