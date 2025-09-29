@@ -1,21 +1,17 @@
-import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, LanguageContext, useLanguageProvider } from "@/hooks/useLanguage";
 import { useTheme, ThemeContext, useThemeProvider } from "@/hooks/useTheme";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { LoginScreen } from "@/components/LoginScreen";
-import { OTPScreen } from "@/components/OTPScreen";
 import { MainApp } from "@/components/MainApp";
 import { useToast } from "@/hooks/use-toast";
-
-type AuthStep = "login" | "otp" | "complete";
+import { useQueryClient } from "@tanstack/react-query";
 
 function HomeContent() {
-  const [authStep, setAuthStep] = useState<AuthStep>("login");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const { user, isAuthenticated, isLoading } = useAuth();
   const typedUser = user as any;
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Initialize WebSocket connection for real-time notifications
   useWebSocket({
@@ -44,37 +40,21 @@ function HomeContent() {
     );
   }
 
-  // If user is authenticated and has completed phone verification, show main app
-  if (isAuthenticated && typedUser?.isVerified) {
-    return <MainApp />;
+  // If user is authenticated but hasn't registered phone/NID, show signup form
+  if (isAuthenticated && !typedUser?.phone) {
+    return (
+      <LoginScreen
+        onSignupComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+          window.location.reload();
+        }}
+      />
+    );
   }
 
-  // If user is authenticated but hasn't verified phone, show verification flow
-  if (isAuthenticated && !typedUser?.isVerified) {
-    if (authStep === "login") {
-      return (
-        <LoginScreen
-          onOTPSent={(phone) => {
-            setPhoneNumber(phone);
-            setAuthStep("otp");
-          }}
-        />
-      );
-    }
-
-    if (authStep === "otp") {
-      return (
-        <OTPScreen
-          phone={phoneNumber}
-          onVerified={() => {
-            setAuthStep("complete");
-            // Refresh user data
-            window.location.reload();
-          }}
-          onBack={() => setAuthStep("login")}
-        />
-      );
-    }
+  // If user is authenticated and has registered, show main app
+  if (isAuthenticated && typedUser?.phone) {
+    return <MainApp />;
   }
 
   // For non-authenticated users, redirect to login
